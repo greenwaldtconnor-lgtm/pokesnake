@@ -317,15 +317,17 @@ button:hover {
     min-height: 100dvh;
     padding: max(10px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
     border-radius: 0;
-    overflow: hidden;
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    align-content: start;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-content: stretch;
   }
 
   .action-row {
     justify-content: center;
     margin-top: 10px;
+    order: 2;
   }
 
   .subtitle,
@@ -337,7 +339,8 @@ button:hover {
 
   .status-row {
     gap: 10px;
-    margin-bottom: 14px;
+    margin-bottom: 0;
+    order: 1;
   }
 
   .status-pill {
@@ -348,7 +351,8 @@ button:hover {
 
   .trainer-row {
     gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    order: 3;
   }
 
   .trainer-card,
@@ -368,6 +372,7 @@ button:hover {
     gap: 10px;
     grid-template-rows: 1fr auto;
     min-height: 0;
+    order: 0;
   }
 
   canvas {
@@ -387,5 +392,19 @@ button:hover {
     margin-top: 8px;
     font-size: 0.92rem;
     text-align: center;
+    order: 4;
+  }
+
+  .eyebrow {
+    margin-bottom: -2px;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    margin: 0;
+  }
+
+  .subtitle {
+    display: none;
   }
 }
