@@ -44,7 +44,7 @@ const state = {
   badges: 0,
   best: Number(localStorage.getItem(BEST_KEY) || 0),
   trainerName: localStorage.getItem(TRAINER_KEY) || "Trainer",
-  touchStart: null,
+  pointerStart: null,
   gameOver: false,
   running: false,
   paused: false,
@@ -281,6 +281,32 @@ function getSwipeDirection(deltaX, deltaY) {
   return deltaY > 0 ? { x: 0, y: 1 } : { x: 0, y: -1 };
 }
 
+function onPointerStart(event) {
+  state.pointerStart = { x: event.clientX, y: event.clientY };
+}
+
+function onPointerEnd(event) {
+  if (!state.pointerStart) {
+    return;
+  }
+
+  const nextDirection = getSwipeDirection(
+    event.clientX - state.pointerStart.x,
+    event.clientY - state.pointerStart.y
+  );
+
+  state.pointerStart = null;
+
+  if (nextDirection) {
+    handleDirectionalInput(nextDirection);
+    return;
+  }
+
+  if (!state.running && !state.gameOver) {
+    startGame();
+  }
+}
+
 function step() {
   state.direction = state.queuedDirection;
   const head = state.snake[0];
@@ -511,37 +537,25 @@ document.addEventListener("keydown", (event) => {
   handleDirectionalInput(nextDirection);
 });
 
-canvas.addEventListener("touchstart", (event) => {
-  const touch = event.changedTouches[0];
-  state.touchStart = { x: touch.clientX, y: touch.clientY };
-}, { passive: true });
-
-canvas.addEventListener("touchmove", (event) => {
+canvas.addEventListener("pointerdown", (event) => {
   event.preventDefault();
-}, { passive: false });
+  canvas.setPointerCapture(event.pointerId);
+  onPointerStart(event);
+});
 
-canvas.addEventListener("touchend", (event) => {
-  if (!state.touchStart) {
-    return;
-  }
-
-  const touch = event.changedTouches[0];
-  const nextDirection = getSwipeDirection(
-    touch.clientX - state.touchStart.x,
-    touch.clientY - state.touchStart.y
-  );
-
-  state.touchStart = null;
-  if (!nextDirection) {
-    return;
-  }
-
+canvas.addEventListener("pointerup", (event) => {
   event.preventDefault();
-  handleDirectionalInput(nextDirection);
-}, { passive: false });
+  onPointerEnd(event);
+});
 
-canvas.addEventListener("touchcancel", () => {
-  state.touchStart = null;
+canvas.addEventListener("pointercancel", () => {
+  state.pointerStart = null;
+});
+
+canvas.addEventListener("pointermove", (event) => {
+  if (event.pointerType !== "mouse") {
+    event.preventDefault();
+  }
 });
 
 saveTrainerButton.addEventListener("click", saveTrainerName);
@@ -555,6 +569,14 @@ usernameEl.addEventListener("keydown", (event) => {
 pauseButton.addEventListener("click", togglePause);
 startButton.addEventListener("click", startGame);
 restartButton.addEventListener("click", resetGame);
+
+document.addEventListener("touchmove", (event) => {
+  const target = event.target;
+  if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+    return;
+  }
+  event.preventDefault();
+}, { passive: false });
 
 usernameEl.value = state.trainerName;
 updateBestFromLeaderboard();
