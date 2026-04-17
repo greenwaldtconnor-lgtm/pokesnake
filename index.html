@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pocket Snake League</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero-card">
+      <p class="eyebrow">Pocket Monster Arena</p>
+      <h1>Pocket Snake League</h1>
+      <p class="subtitle">
+        Guide your creature train through tall grass, scoop up berries, and earn badges in a
+        monster-battling take on classic Snake.
+      </p>
+
+      <div class="status-row">
+        <article class="status-pill">
+          <span class="status-label">Score</span>
+          <strong id="score">0</strong>
+        </article>
+        <article class="status-pill">
+          <span class="status-label">Badges</span>
+          <strong id="badges">0</strong>
+        </article>
+        <article class="status-pill">
+          <span class="status-label">Best</span>
+          <strong id="best">0</strong>
+        </article>
+      </div>
+
+      <div class="game-panel">
+        <canvas id="game" width="504" height="504" aria-label="Pocket Snake League game board"></canvas>
+
+        <aside class="side-panel">
+          <div class="panel-card">
+            <h2>Controls</h2>
+            <p>Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move.</p>
+            <p>Press <strong>Space</strong> to pause and resume.</p>
+          </div>
+
+          <div class="panel-card">
+            <h2>Goal</h2>
+            <p>Collect berries, dodge rock walls, and survive long enough to earn gym badges.</p>
+          </div>
+
+          <div class="panel-card">
+            <h2>Progression</h2>
+            <p>Every 5 berries earns a badge and speeds up the match.</p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="action-row">
+        <button id="startButton" class="primary-button" type="button">Start Adventure</button>
+        <button id="restartButton" class="secondary-button" type="button">Restart Run</button>
+      </div>
+
+      <p id="message" class="message">Catch the rhythm, stay out of the grass line, and become champion.</p>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
