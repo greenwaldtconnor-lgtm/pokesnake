@@ -11,7 +11,6 @@ const usernameEl = document.getElementById("username");
 const saveTrainerButton = document.getElementById("saveTrainerButton");
 const leaderboardEl = document.getElementById("leaderboard");
 const pauseButton = document.getElementById("pauseButton");
-const controlButtons = document.querySelectorAll("[data-direction]");
 
 const TILE_SIZE = 28;
 const GRID_SIZE = 18;
@@ -20,6 +19,7 @@ const BEST_KEY = "pocket-snake-league-best";
 const TRAINER_KEY = "pocket-snake-league-trainer";
 const LEADERBOARD_KEY = "pocket-snake-league-leaderboard";
 const LEADERBOARD_LIMIT = 5;
+const SWIPE_THRESHOLD = 24;
 
 const directionMap = {
   ArrowUp: { x: 0, y: -1 },
@@ -30,13 +30,6 @@ const directionMap = {
   KeyA: { x: -1, y: 0 },
   ArrowRight: { x: 1, y: 0 },
   KeyD: { x: 1, y: 0 }
-};
-
-const buttonDirectionMap = {
-  up: { x: 0, y: -1 },
-  down: { x: 0, y: 1 },
-  left: { x: -1, y: 0 },
-  right: { x: 1, y: 0 }
 };
 
 const leaderboard = loadLeaderboard();
@@ -51,6 +44,7 @@ const state = {
   badges: 0,
   best: Number(localStorage.getItem(BEST_KEY) || 0),
   trainerName: localStorage.getItem(TRAINER_KEY) || "Trainer",
+  touchStart: null,
   gameOver: false,
   running: false,
   paused: false,
@@ -266,6 +260,25 @@ function queueDirection(nextDirection) {
     return;
   }
   state.queuedDirection = nextDirection;
+}
+
+function handleDirectionalInput(nextDirection) {
+  queueDirection(nextDirection);
+  if (!state.running && !state.gameOver) {
+    startGame();
+  }
+}
+
+function getSwipeDirection(deltaX, deltaY) {
+  if (Math.abs(deltaX) < SWIPE_THRESHOLD && Math.abs(deltaY) < SWIPE_THRESHOLD) {
+    return null;
+  }
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    return deltaX > 0 ? { x: 1, y: 0 } : { x: -1, y: 0 };
+  }
+
+  return deltaY > 0 ? { x: 0, y: 1 } : { x: 0, y: -1 };
 }
 
 function step() {
@@ -495,20 +508,40 @@ document.addEventListener("keydown", (event) => {
   }
 
   event.preventDefault();
-  queueDirection(nextDirection);
-  if (!state.running && !state.gameOver) {
-    startGame();
-  }
+  handleDirectionalInput(nextDirection);
 });
 
-controlButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const nextDirection = buttonDirectionMap[button.dataset.direction];
-    queueDirection(nextDirection);
-    if (!state.running && !state.gameOver) {
-      startGame();
-    }
-  });
+canvas.addEventListener("touchstart", (event) => {
+  const touch = event.changedTouches[0];
+  state.touchStart = { x: touch.clientX, y: touch.clientY };
+}, { passive: true });
+
+canvas.addEventListener("touchmove", (event) => {
+  event.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener("touchend", (event) => {
+  if (!state.touchStart) {
+    return;
+  }
+
+  const touch = event.changedTouches[0];
+  const nextDirection = getSwipeDirection(
+    touch.clientX - state.touchStart.x,
+    touch.clientY - state.touchStart.y
+  );
+
+  state.touchStart = null;
+  if (!nextDirection) {
+    return;
+  }
+
+  event.preventDefault();
+  handleDirectionalInput(nextDirection);
+}, { passive: false });
+
+canvas.addEventListener("touchcancel", () => {
+  state.touchStart = null;
 });
 
 saveTrainerButton.addEventListener("click", saveTrainerName);
