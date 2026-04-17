@@ -31,6 +31,25 @@
         </article>
       </div>
 
+      <section class="trainer-row" aria-label="Trainer profile and leaderboard">
+        <div class="trainer-card">
+          <label class="field-label" for="username">Trainer Name</label>
+          <div class="trainer-input-row">
+            <input id="username" name="username" type="text" maxlength="16" placeholder="Ash" autocomplete="nickname">
+            <button id="saveTrainerButton" class="secondary-button compact-button" type="button">Save Trainer</button>
+          </div>
+          <p class="field-hint">Your current trainer name is used for leaderboard runs on this device.</p>
+        </div>
+
+        <div class="leaderboard-card">
+          <div class="leaderboard-header">
+            <h2>Hall of Fame</h2>
+            <span class="leaderboard-subtitle">Top local scores</span>
+          </div>
+          <ol id="leaderboard" class="leaderboard-list" aria-live="polite"></ol>
+        </div>
+      </section>
+
       <div class="game-panel">
         <canvas id="game" width="504" height="504" aria-label="Pocket Snake League game board"></canvas>
 
@@ -38,7 +57,7 @@
           <div class="panel-card">
             <h2>Controls</h2>
             <p>Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move.</p>
-            <p>Press <strong>Space</strong> to pause and resume.</p>
+            <p>Tap the D-pad on mobile. Press <strong>Space</strong> or the pause button to pause and resume.</p>
           </div>
 
           <div class="panel-card">
@@ -52,6 +71,14 @@
           </div>
         </aside>
       </div>
+
+      <section class="mobile-controls" aria-label="Mobile controls">
+        <button class="control-button up" type="button" data-direction="up">▲</button>
+        <button class="control-button left" type="button" data-direction="left">◀</button>
+        <button class="control-button pause" id="pauseButton" type="button">Pause</button>
+        <button class="control-button right" type="button" data-direction="right">▶</button>
+        <button class="control-button down" type="button" data-direction="down">▼</button>
+      </section>
 
       <div class="action-row">
         <button id="startButton" class="primary-button" type="button">Start Adventure</button>

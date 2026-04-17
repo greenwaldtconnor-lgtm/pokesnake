@@ -75,6 +75,13 @@ h1 {
   margin-bottom: 22px;
 }
 
+.trainer-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(280px, 1.1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
 .status-pill {
   min-width: 120px;
   padding: 14px 16px;
@@ -95,6 +102,90 @@ h1 {
 
 .status-pill strong {
   font-size: 1.5rem;
+}
+
+.trainer-card,
+.leaderboard-card {
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(236, 246, 238, 0.86));
+  border: 2px solid rgba(22, 48, 43, 0.08);
+}
+
+.field-label,
+.leaderboard-card h2 {
+  display: block;
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.trainer-input-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+input[type="text"] {
+  flex: 1 1 180px;
+  min-width: 0;
+  padding: 13px 16px;
+  border-radius: 16px;
+  border: 2px solid rgba(22, 48, 43, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ink);
+  font: inherit;
+}
+
+input[type="text"]:focus {
+  outline: 3px solid rgba(75, 116, 219, 0.25);
+  border-color: var(--blue);
+}
+
+.field-hint,
+.leaderboard-subtitle {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.compact-button {
+  padding: 13px 18px;
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.leaderboard-list {
+  margin: 14px 0 0;
+  padding-left: 22px;
+}
+
+.leaderboard-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(22, 48, 43, 0.08);
+  color: var(--muted);
+}
+
+.leaderboard-list li:last-child {
+  border-bottom: 0;
+}
+
+.leaderboard-name {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.leaderboard-meta {
+  text-align: right;
+  white-space: nowrap;
 }
 
 .game-panel {
@@ -148,6 +239,54 @@ canvas {
   margin-top: 20px;
 }
 
+.mobile-controls {
+  display: none;
+  grid-template-areas:
+    ". up ."
+    "left pause right"
+    ". down .";
+  grid-template-columns: repeat(3, minmax(72px, 110px));
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.control-button {
+  min-height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #eff7ff, #cfe5ff);
+  color: #1e3e80;
+  box-shadow: 0 12px 20px rgba(75, 116, 219, 0.16);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.control-button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.control-button.up {
+  grid-area: up;
+}
+
+.control-button.left {
+  grid-area: left;
+}
+
+.control-button.pause {
+  grid-area: pause;
+  background: linear-gradient(180deg, #fff7d8, #f1dfa0);
+  color: var(--ink);
+}
+
+.control-button.right {
+  grid-area: right;
+}
+
+.control-button.down {
+  grid-area: down;
+}
+
 button {
   border: 0;
   border-radius: 999px;
@@ -186,11 +325,37 @@ button:hover {
     padding: 20px;
   }
 
+  .trainer-row,
   .game-panel {
     grid-template-columns: 1fr;
   }
 
+  .leaderboard-header,
+  .leaderboard-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   canvas {
     max-width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    padding: 14px;
+  }
+
+  .hero-card {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .mobile-controls {
+    display: grid;
+  }
+
+  .action-row {
+    justify-content: center;
   }
 }

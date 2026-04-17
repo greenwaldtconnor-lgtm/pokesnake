@@ -7,11 +7,19 @@ const bestEl = document.getElementById("best");
 const messageEl = document.getElementById("message");
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
+const usernameEl = document.getElementById("username");
+const saveTrainerButton = document.getElementById("saveTrainerButton");
+const leaderboardEl = document.getElementById("leaderboard");
+const pauseButton = document.getElementById("pauseButton");
+const controlButtons = document.querySelectorAll("[data-direction]");
 
 const TILE_SIZE = 28;
 const GRID_SIZE = 18;
 const BADGE_EVERY = 5;
 const BEST_KEY = "pocket-snake-league-best";
+const TRAINER_KEY = "pocket-snake-league-trainer";
+const LEADERBOARD_KEY = "pocket-snake-league-leaderboard";
+const LEADERBOARD_LIMIT = 5;
 
 const directionMap = {
   ArrowUp: { x: 0, y: -1 },
@@ -24,6 +32,15 @@ const directionMap = {
   KeyD: { x: 1, y: 0 }
 };
 
+const buttonDirectionMap = {
+  up: { x: 0, y: -1 },
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 }
+};
+
+const leaderboard = loadLeaderboard();
+
 const state = {
   snake: [],
   direction: { x: 1, y: 0 },
@@ -33,6 +50,7 @@ const state = {
   score: 0,
   badges: 0,
   best: Number(localStorage.getItem(BEST_KEY) || 0),
+  trainerName: localStorage.getItem(TRAINER_KEY) || "Trainer",
   gameOver: false,
   running: false,
   paused: false,
@@ -54,11 +72,93 @@ function resetGame() {
   state.running = false;
   state.paused = false;
   state.speedMs = 140;
+  pauseButton.textContent = "Pause";
   state.rocks = buildRocks();
   placeBerry();
   syncHud();
-  setMessage("Adventure ready. Press Start Adventure to begin.");
+  setMessage(`${state.trainerName}, your adventure is ready. Press Start Adventure to begin.`);
   draw();
+}
+
+function loadLeaderboard() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLeaderboard() {
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+}
+
+function renderLeaderboard() {
+  leaderboardEl.innerHTML = "";
+
+  if (!leaderboard.length) {
+    const emptyItem = document.createElement("li");
+    emptyItem.textContent = "No champions yet. Start a run to claim the first badge.";
+    leaderboardEl.append(emptyItem);
+    return;
+  }
+
+  leaderboard.forEach((entry) => {
+    const item = document.createElement("li");
+
+    const name = document.createElement("span");
+    name.className = "leaderboard-name";
+    name.textContent = entry.name;
+
+    const meta = document.createElement("span");
+    meta.className = "leaderboard-meta";
+    meta.textContent = `${entry.score} pts | ${entry.badges} badges`;
+
+    item.append(name, meta);
+    leaderboardEl.append(item);
+  });
+}
+
+function sanitizeTrainerName(value) {
+  const trimmed = value.trim().replace(/\s+/g, " ");
+  return trimmed || "Trainer";
+}
+
+function saveTrainerName() {
+  state.trainerName = sanitizeTrainerName(usernameEl.value);
+  usernameEl.value = state.trainerName;
+  localStorage.setItem(TRAINER_KEY, state.trainerName);
+  setMessage(`Trainer profile saved. ${state.trainerName} is ready for the next run.`);
+}
+
+function updateBestFromLeaderboard() {
+  const leaderboardBest = leaderboard.length ? leaderboard[0].score : 0;
+  state.best = Math.max(state.best, leaderboardBest);
+  localStorage.setItem(BEST_KEY, String(state.best));
+}
+
+function addLeaderboardEntry() {
+  if (state.score <= 0) {
+    return;
+  }
+
+  leaderboard.push({
+    name: state.trainerName,
+    score: state.score,
+    badges: state.badges
+  });
+
+  leaderboard.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    return b.badges - a.badges;
+  });
+
+  leaderboard.splice(LEADERBOARD_LIMIT);
+  saveLeaderboard();
+  updateBestFromLeaderboard();
+  renderLeaderboard();
 }
 
 function buildRocks() {
@@ -110,6 +210,10 @@ function syncHud() {
 }
 
 function startGame() {
+  state.trainerName = sanitizeTrainerName(usernameEl.value);
+  usernameEl.value = state.trainerName;
+  localStorage.setItem(TRAINER_KEY, state.trainerName);
+
   if (state.gameOver) {
     resetGame();
   }
@@ -120,7 +224,7 @@ function startGame() {
 
   state.running = true;
   state.paused = false;
-  setMessage("Badge hunt in progress. Stay sharp in the tall grass.");
+  setMessage(`${state.trainerName}, badge hunt in progress. Stay sharp in the tall grass.`);
   scheduleTick();
 }
 
@@ -144,6 +248,7 @@ function togglePause() {
 
   state.paused = !state.paused;
   setMessage(state.paused ? "Adventure paused." : "Adventure resumed.");
+  pauseButton.textContent = state.paused ? "Resume" : "Pause";
   if (!state.paused) {
     scheduleTick();
   } else {
@@ -220,8 +325,10 @@ function endGame() {
   state.running = false;
   state.paused = false;
   clearTimeout(state.tickId);
+  pauseButton.textContent = "Pause";
+  addLeaderboardEntry();
   syncHud();
-  setMessage(`Adventure over. Final score ${state.score}. Press Restart Run to try again.`);
+  setMessage(`${state.trainerName} finished with ${state.score} points. Press Restart Run to try again.`);
 }
 
 function drawBoard() {
@@ -394,7 +501,29 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+controlButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const nextDirection = buttonDirectionMap[button.dataset.direction];
+    queueDirection(nextDirection);
+    if (!state.running && !state.gameOver) {
+      startGame();
+    }
+  });
+});
+
+saveTrainerButton.addEventListener("click", saveTrainerName);
+usernameEl.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    saveTrainerName();
+  }
+});
+
+pauseButton.addEventListener("click", togglePause);
 startButton.addEventListener("click", startGame);
 restartButton.addEventListener("click", resetGame);
 
+usernameEl.value = state.trainerName;
+updateBestFromLeaderboard();
+renderLeaderboard();
 resetGame();
